@@ -7,21 +7,11 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import gymnasium as gym
 from stable_baselines3 import PPO
 
-# Import your custom environment
-from spinning_acrobot_env import SpinningAcrobotEnv
-
-# Register it
-gym.register(
-    id="SpinningAcrobot-v0",
-    entry_point="spinning_acrobot_env:SpinningAcrobotEnv",
-    max_episode_steps=500,
-)
-
 # create the environment
-env = gym.make("SpinningAcrobot-v0", render_mode="human")
+env = gym.make("Acrobot-v1", render_mode="human")
 
 # Load your trained model
-model = PPO.load("ppo_spinning_acrobot")
+model = PPO.load("ppo_acrobot")
 
 obs, _ = env.reset()
 
