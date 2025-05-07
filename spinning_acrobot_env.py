@@ -30,16 +30,18 @@ class SpinningAcrobotEnv(AcrobotEnv):
         # Get current joint angles
         theta1, theta2 = self.state[0], self.state[1]
 
-        # Compute the tip position (radians)
+        # Compute the tip position
         x_tip = -np.cos(theta1) - np.cos(theta1 + theta2)
         y_tip = -np.sin(theta1) - np.sin(theta1 + theta2)
 
-        # Compute current tip angle
+        # Compute current tip angle in radians
+        # Note: np.arctan2 returns angle in radians between -pi and pi
+        # We want the angle of the tip with respect to the x-axis
         tip_angle = np.arctan2(y_tip, x_tip)
 
         if self.prev_tip_angle is not None:
             # Handle wrap-around using np.unwrap-like logic
-            delta = tip_angle - self.prev_tip_angle
+            delta = tip_angle - self.prev_tip_angle  # Change in angle
             delta = (delta + np.pi) % (2 * np.pi) - np.pi  # Normalize to [-pi, pi]
 
             # Determine direction if not already known
@@ -63,9 +65,6 @@ class SpinningAcrobotEnv(AcrobotEnv):
             reward = 1000.0
             terminated = True
             self.spin_complete = True
-        elif self.total_spin_angle >= 0.5 * self.target_spins * 2 * np.pi:
-            reward = 0.5 * (self.total_spin_angle / (self.target_spins * 2 * np.pi)) * 1000.0
-            terminated = False
         else:
             reward = 0.0
             terminated = False
