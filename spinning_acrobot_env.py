@@ -63,6 +63,9 @@ class SpinningAcrobotEnv(AcrobotEnv):
             reward = 1000.0
             terminated = True
             self.spin_complete = True
+        elif self.total_spin_angle >= 0.5 * self.target_spins * 2 * np.pi:
+            reward = 0.5 * (self.total_spin_angle / (self.target_spins * 2 * np.pi)) * 1000.0
+            terminated = False
         else:
             reward = 0.0
             terminated = False
