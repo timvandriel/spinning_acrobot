@@ -28,7 +28,12 @@ class SpinningAcrobotEnv(AcrobotEnv):
         obs, reward, terminated, truncated, info = super().step(action)
 
         # Get current joint angles
-        theta1, theta2 = self.state[0], self.state[1]
+        theta1, theta2, angvel1, angvel2 = (
+            self.state[0],
+            self.state[1],
+            self.state[2],
+            self.state[3],
+        )
 
         # Compute the tip position
         x_tip = -np.cos(theta1) - np.cos(theta1 + theta2)
@@ -63,8 +68,26 @@ class SpinningAcrobotEnv(AcrobotEnv):
         # Check for success
         if self.total_spin_angle >= self.target_spins * 2 * np.pi:
             reward = 1000.0
+            if theta2 == 0.0:  # Check if the second joint is straight
+                reward += 500.0
+            else:
+                reward += 10.0 - 10 * abs(theta2)
+            reward += 20 * abs(angvel1) + 5 * abs(angvel2)  # Encourage fast spins
             terminated = True
             self.spin_complete = True
+        elif self.total_spin_angle >= 0.3 * self.target_spins * 2 * np.pi:
+            reward = (
+                0.5 * (self.total_spin_angle / (self.target_spins * 2 * np.pi)) * 500.0
+            )
+            if theta2 == 0.0:  # Check if the second joint is straight
+                reward += 500.0
+            else:
+                reward += 10.0 - 10 * abs(theta2)
+            reward += 20 * abs(angvel1) + 5 * abs(angvel2)  # Encourage fast spins
+            terminated = False
+        elif self.total_spin_angle < np.pi:
+            reward = -1.0  # Penalty for not spinning enough
+            terminated = False
         else:
             reward = 0.0
             terminated = False
